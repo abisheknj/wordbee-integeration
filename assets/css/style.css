@@ -1,0 +1,122 @@
+/* Pagination button container */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Pagination button styles */
+.pagination-button {
+    background-color: #007bff; /* Blue background */
+    color: #fff; /* White text */
+    border: none; /* No border */
+    padding: 8px 16px; /* Padding */
+    margin: 0 5px; /* Margin between buttons */
+    cursor: pointer; /* Cursor style */
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+    display: flex; /* Flex container for icon */
+    align-items: center; /* Align icon and text vertically */
+}
+
+/* Icon styles */
+.pagination-button i {
+    margin-right: 5px; /* Spacing between icon and text */
+}
+
+/* Hover effect */
+.pagination-button:hover {
+    background-color: #0056b3; /* Darker blue */
+}
+
+/* Disabled button styles */
+.pagination-button:disabled {
+    background-color: #ccc; /* Gray background */
+    cursor: not-allowed; /* Disable cursor */
+}
+
+/* Disabled button hover effect */
+.pagination-button:disabled:hover {
+    background-color: #ccc; /* Gray background */
+}
+
+
+.card {
+    width: 300px;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #343a40;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    font-size: 16px;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+
+table {
+    font-size: 14px;
+}
+
+table th, table td {
+    padding: 5px 10px;
+    text-align: left;
+}
+
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-button {
+    margin: 0 5px;
+    padding: 5px 10px;
+}
+
+.pagination-button:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+}
+
+#projectForm {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#projectForm div {
+    margin-right: 20px;
+}
+
+#projectForm label {
+    display: block;
+}
+
+#projectForm input[type="text"], #projectForm input[type="date"], #projectForm select {
+    margin-top: 5px;
+}
+
+#projectForm input[type="submit"] {
+    margin-top: 10px;
+}
+
+#projectForm input, #projectForm select {
+    padding: 5px;
+    font-size: 14px;
+}
+
