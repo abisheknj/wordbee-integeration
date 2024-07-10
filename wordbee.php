@@ -37,6 +37,7 @@ add_action('wp_enqueue_scripts', 'wordbee_enqueue_scripts');
 function enqueue_custom_scripts() {
     wp_enqueue_script('jquery');
     wp_enqueue_script('jquery-ui-accordion');
+    wordbee_enqueue_scripts('https://code.jquery.com/jquery-3.6.0.min.js');
     wp_enqueue_style('jquery-ui-css', 'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
 }
 add_action('wp_enqueue_scripts', 'enqueue_custom_scripts');

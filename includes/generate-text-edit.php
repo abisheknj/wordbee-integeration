@@ -5,6 +5,9 @@ require_once(plugin_dir_path(__FILE__) .'encryption.php');
 
 function get_text_edit($job_id, $date_filter) {
     $token = get_auth_token();
+    error_log("Get Text edit running");
+    error_log($job_id);
+    
     $filetoken = make_api_call($token, $job_id, $date_filter);
 
     if ($filetoken) {
@@ -45,13 +48,17 @@ function make_api_call($token, $job_id, $date_filter) {
     $date_from = $date_filter['dateFrom'];
     $date_to = $date_filter['dateTo'];
 
+    error_log($date_from);
+    error_log($date_to);
+
+
     if ($token) {
         // API endpoint URL and data
         $url = 'https://td.eu.wordbee-translator.com/api/resources/segments/textedits';
         $data = array(
             'scope' => array('type' => 'Job', 'jobid' => $job_id , 'jobcdyt' => true),
-            'dateFrom' => $date_from,
-            'dateTo' => $date_to
+            // 'dateFrom' => $date_from,
+            // 'dateTo' => $date_to
         );
 
         // Make the API call with token in header using wp_remote_post()
@@ -98,7 +105,7 @@ function poll_operation_completion($request_id, $token) {
     // Poll until the operation is finished
     do {
         // Wait for a brief moment before polling again
-        sleep(2);
+        sleep(1);
 
         // Make the API call to check operation status
         $response = wp_remote_get($url, array(

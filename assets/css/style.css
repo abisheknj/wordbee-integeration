@@ -1,57 +1,97 @@
-/* Pagination button container */
-.pagination {
-    display: flex;
-    justify-content: center;
+/* Main Table Styles */
+#projectTable {
+    width: 100%;
+    border-collapse: collapse;
     margin-top: 20px;
+    font-size: 14px;
 }
 
-/* Pagination button styles */
-.pagination-button {
-    background-color: #007bff; /* Blue background */
-    color: #fff; /* White text */
-    border: none; /* No border */
-    padding: 8px 16px; /* Padding */
-    margin: 0 5px; /* Margin between buttons */
-    cursor: pointer; /* Cursor style */
-    border-radius: 4px; /* Rounded corners */
-    transition: background-color 0.3s, color 0.3s; /* Smooth transition */
-    display: flex; /* Flex container for icon */
-    align-items: center; /* Align icon and text vertically */
+#projectTable th,
+#projectTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
 }
 
-/* Icon styles */
-.pagination-button i {
-    margin-right: 5px; /* Spacing between icon and text */
+
+
+.loading {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999; /* Ensure it's above all other elements */
 }
 
-/* Hover effect */
-.pagination-button:hover {
-    background-color: #0056b3; /* Darker blue */
+.loading-spinner {
+    position: absolute;
+    top: 10%; /* Position it at the top */
+    left: 68%;
+    transform: translate(-50%, 0); /* Center horizontally */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 5px solid #f3f3f3; /* Light grey border */
+    border-top: 5px solid #3498db; /* Blue border for spinner animation */
+    animation: spin 1s linear infinite; /* Rotate animation */
 }
 
-/* Disabled button styles */
-.pagination-button:disabled {
-    background-color: #ccc; /* Gray background */
-    cursor: not-allowed; /* Disable cursor */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-/* Disabled button hover effect */
-.pagination-button:disabled:hover {
-    background-color: #ccc; /* Gray background */
+
+
+
+
+.project-table th {
+    background-color: #004e78;
+    color: white;
 }
+
+
+/* Sub-Table Styles */
+.job-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 12px;
+    background-color: #e0f7fa;
+}
+
+.job-table th,
+.job-table td {
+    border: 1px solid #bbb;
+    padding: 6px;
+    text-align: left;
+}
+
+.job-table th {
+    background-color: #43aee8;
+    color: white;
+}
+
+/* .job-table tr:nth-child(even) {
+    background-color: #b3e5fc;
+} */
 
 
 .card {
-    width: 300px;
+    width: 250px; /* Smaller fixed width for the card */
     background-color: #f8f9fa;
     border: 1px solid #ced4da;
     border-radius: 5px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
+    margin: 20px auto; /* Center the card horizontally */
+    position: relative; /* Necessary for absolute positioning of the icon */
+    padding: 15px; /* Add padding for better spacing */
 }
 
 .card-body {
-    padding: 20px;
+    position: relative; /* Necessary for absolute positioning of the icon */
 }
 
 .card-title {
@@ -64,8 +104,38 @@
 .card-text {
     font-size: 16px;
     color: #6c757d;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
 }
+
+.edit-distance-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-block;
+}
+
+.info-icon {
+    font-size: 16px;
+    color: #999;
+}
+
+.edit-distance-info:hover::after {
+    content: attr(title);
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1000;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    display: block;
+    width: max-content;
+}
+
 
 
 table {
@@ -118,5 +188,32 @@ table th, table td {
 #projectForm input, #projectForm select {
     padding: 5px;
     font-size: 14px;
+}
+.edit-distance-card {
+    border: 1px solid #ddd;
+    padding: 16px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9f9f9;
+}
+
+.card-content {
+    text-align: center;
+}
+
+.card-content h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.card-content p {
+    margin: 5px 0 0;
+    font-size: 1.5em;
+    color: #555;
 }
 
