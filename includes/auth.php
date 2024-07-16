@@ -54,9 +54,7 @@ function get_api_token() {
 
 function get_cached_api_token() {
     $token = get_transient('api_token'); // Check if token is cached
-    error_log( 'method starting' . $token );
     $decryptedToken = decrypt_token(API_KEY);
-    error_log( 'decry token is :' . $decryptedToken);
 
 
     if ( ! $token ) {
@@ -74,7 +72,6 @@ function get_cached_api_token() {
         }
         
     }
-    error_log( 'token is present' . $token );
 
     return $token;
 }
@@ -83,6 +80,5 @@ function get_cached_api_token() {
 function get_auth_token() {
     $token =  get_cached_api_token();
     $key = decrypt_token(API_KEY);
-    error_log('Api key is .' . $key);
     return decrypt_token($token);
 }

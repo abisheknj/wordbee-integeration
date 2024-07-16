@@ -3,65 +3,55 @@
 require_once(plugin_dir_path(__FILE__) .'auth.php');
 require_once(plugin_dir_path(__FILE__) .'encryption.php');
 
-function get_text_edit($job_id, $date_filter) {
+function get_text_edit($job_id, $date_filter , $trg) {
     $token = get_auth_token();
     error_log("Get Text edit running");
-    error_log($job_id);
+    error_log("Job ID: $job_id");
     
-    $filetoken = make_api_call($token, $job_id, $date_filter);
+    $filetoken = make_api_call($token, $job_id, $date_filter ,  $trg);
 
     if ($filetoken) {
-        // Log the API response
-        error_log('Async API Operation Response with file token: ' . $filetoken);
+        error_log("Async API Operation Response with file token: $filetoken");
 
         $second_response = call_second_api($filetoken, $token);
 
         if ($second_response) {
-            // Log the second API response
             error_log('Second API Call Response: ' . json_encode($second_response));
-
-            // Increment API call statistics for successful call
             increment_api_call(true);
-
             return $second_response;
         } else {
             error_log('Failed to perform second API call.');
-
-          // Increment API call statistics for failed call
             increment_api_call(false);
             return 'No Data Available';
         }
     } else {
         error_log('Failed to perform async API operation.');
-
-        // Increment API call statistics for failed call
         increment_api_call(false);
-
         return 'No Data Available';
     }
 }
 
-// Function: make_api_call()
-function make_api_call($token, $job_id, $date_filter) {
+function make_api_call($token, $job_id, $date_filter , $trg) {
     error_log('Starting async API operation.');
 
     $date_from = $date_filter['dateFrom'];
     $date_to = $date_filter['dateTo'];
 
-    error_log($date_from);
-    error_log($date_to);
-
+    error_log("Date From: $date_from");
+    error_log("Date To: $date_to");
 
     if ($token) {
-        // API endpoint URL and data
         $url = 'https://td.eu.wordbee-translator.com/api/resources/segments/textedits';
         $data = array(
-            'scope' => array('type' => 'Job', 'jobid' => $job_id , 'jobcdyt' => true),
-            // 'dateFrom' => $date_from,
-            // 'dateTo' => $date_to
+            'scope' => array(
+                'type' => 'Job',
+                'jobid' => $job_id,
+                'jobcdyt' => true
+            ),
+            'trgs' => array($trg)
         );
+        error_log('API Request Data: ' . json_encode($data));
 
-        // Make the API call with token in header using wp_remote_post()
         $response = wp_remote_post($url, array(
             'body' => json_encode($data),
             'headers' => array(
@@ -71,43 +61,42 @@ function make_api_call($token, $job_id, $date_filter) {
             )
         ));
 
-        // Check if the request was successful
         if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
-            // Decode the JSON response body
             $response_data = json_decode(wp_remote_retrieve_body($response), true);
 
-            // Check if operation started successfully
             if (isset($response_data['trm']['requestid'])) {
-                // Poll for operation completion
                 $result = poll_operation_completion($response_data['trm']['requestid'], $token);
                 return $result;
             } else {
-                error_log('Failed to start async API operation.');
-                increment_api_call(false); // Increment API call statistics for failed call
-                return false; // Operation failed to start
+                error_log('Failed to start async API operation. Response Data: ' . json_encode($response_data));
+                increment_api_call(false);
+                return false;
             }
         } else {
-            error_log('Failed to perform async API operation. Error: ' . wp_remote_retrieve_response_message($response));
-            increment_api_call(false); // Increment API call statistics for failed call
-            return false; // API call failed
+            error_log('Failed to perform async API operation. Response Code: ' . wp_remote_retrieve_response_code($response));
+            error_log('Response Message: ' . wp_remote_retrieve_response_message($response));
+            increment_api_call(false);
+            return false;
         }
     } else {
         error_log('Failed to obtain token for async API operation.');
-        increment_api_call(false); // Increment API call statistics for failed call
-        return false; // Failed to obtain token
+        increment_api_call(false);
+        return false;
     }
 }
 
-// Function: poll_operation_completion()
 function poll_operation_completion($request_id, $token) {
     $url = 'https://td.eu.wordbee-translator.com/api/trm/status?requestid=' . $request_id;
 
-    // Poll until the operation is finished
-    do {
-        // Wait for a brief moment before polling again
-        sleep(1);
+    error_log("Polling for operation completion. Request ID: $request_id");
 
-        // Make the API call to check operation status
+    $max_attempts = 5; // Maximum number of polling attempts
+    $retry_delay = 1; // Initial retry delay in seconds
+    $attempt = 1;
+
+    do {
+        sleep($retry_delay);
+
         $response = wp_remote_get($url, array(
             'headers' => array(
                 'X-Auth-Token' =>  $token,
@@ -115,37 +104,51 @@ function poll_operation_completion($request_id, $token) {
             )
         ));
 
-        // Check if the request was successful
         if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
-            // Decode the JSON response body
             $response_data = json_decode(wp_remote_retrieve_body($response), true);
 
-            // Check if operation status is 'Finished'
-            if (isset($response_data['trm']['status']) && $response_data['trm']['status'] === 'Finished') {
-                // Return the file token if available
-                if (isset($response_data['custom']['filetoken'])) {
-                    return $response_data['custom']['filetoken'];
+            error_log('Poll Response Data: ' . json_encode($response_data));
+
+            if (isset($response_data['trm']['status'])) {
+                if ($response_data['trm']['status'] === 'Finished') {
+                    if (isset($response_data['custom']['filetoken'])) {
+                        error_log("Operation finished. File Token: " . $response_data['custom']['filetoken']);
+                        return $response_data['custom']['filetoken'];
+                    } else {
+                        error_log('File token not found in poll response.');
+                        return false;
+                    }
+                } elseif ($response_data['trm']['status'] === 'Waiting') {
+                    // Increment retry delay up to a maximum of 10 seconds
+                    $retry_delay = min($retry_delay * 2, 10);
                 } else {
-                    return false; // File token not found
+                    // Handle other statuses if needed
+                    error_log('Operation status: ' . $response_data['trm']['status']);
                 }
+            } else {
+                error_log('Status field not found in poll response.');
+                return false;
             }
         } else {
-            // Log error message if API call failed
-            error_log('Failed to poll async API operation status. Error: ' . wp_remote_retrieve_response_message($response));
-            increment_api_call(false); // Increment API call statistics for failed call
-            return false; // API call failed
+            error_log('Failed to poll async API operation status. Response Code: ' . wp_remote_retrieve_response_code($response));
+            error_log('Response Message: ' . wp_remote_retrieve_response_message($response));
+            increment_api_call(false);
+            return false;
         }
-    } while (true);
+
+        $attempt++;
+    } while ($attempt <= $max_attempts);
+
+    // If reached maximum attempts, mark as failed
+    error_log("Polling for request ID $request_id exceeded maximum attempts. Marking operation as failed.");
+    return false;
 }
 
-// Function: call_second_api()
 function call_second_api($filetoken, $token) {
-    error_log('Calling second API');
+    error_log('Calling second API with File Token: ' . $filetoken);
 
-    // API endpoint URL with filetoken parameter
     $url = 'https://td.eu.wordbee-translator.com/api/media/get/' . $filetoken;
 
-    // Make the API call with token in header using wp_remote_get()
     $response = wp_remote_get($url, array(
         'headers' => array(
             'X-Auth-Token' =>  $token,
@@ -153,17 +156,14 @@ function call_second_api($filetoken, $token) {
         )
     ));
 
-    // Check if the request was successful
     if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
-        // Increment API call statistics for successful call
         increment_api_call(true);
-
-        // Return the response body
         return wp_remote_retrieve_body($response);
     } else {
-        error_log('Failed to perform second API call. Error: ' . wp_remote_retrieve_response_message($response));
-        increment_api_call(false); // Increment API call statistics for failed call
-        return false; // API call failed
+        error_log('Failed to perform second API call. Response Code: ' . wp_remote_retrieve_response_code($response));
+        error_log('Response Message: ' . wp_remote_retrieve_response_message($response));
+        increment_api_call(false);
+        return false;
     }
 }
 ?>

@@ -13,36 +13,69 @@
     text-align: left;
 }
 
-
-
-.loading {
+.loading{
     display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
+}
+
+
+.loading-container{
+    height: 170px;
+    width: 380px !important; /* You can adjust the width as needed */
+    
+    background: white;
+    border-radius: 10px;
+    filter: drop-shadow(2px 2px 5px #00000057);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    
+    position: fixed; /* Make the loader fixed on the screen */
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999; /* Ensure the loader is on top */
+  }
+  
+  .loading-wrapper {
+    height: 10px;
+    width: 90%;
+    
+    margin-inline: 5%;
+    
+    background: #CFD8DC;
+    border-radius: 5px;
+    
+    overflow: hidden;
+  }
+  
+  .loader {
+    background-color: #304FFE;
     height: 100%;
-    z-index: 9999; /* Ensure it's above all other elements */
-}
-
-.loading-spinner {
-    position: absolute;
-    top: 10%; /* Position it at the top */
-    left: 68%;
-    transform: translate(-50%, 0); /* Center horizontally */
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 5px solid #f3f3f3; /* Light grey border */
-    border-top: 5px solid #3498db; /* Blue border for spinner animation */
-    animation: spin 1s linear infinite; /* Rotate animation */
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
+    width: 80%;
+    animation: loading 2s ease infinite;
+  }
+  
+  @keyframes loading {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  @keyframes loading {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(130%);
+    }
+  }
+  
 
 
 
@@ -80,7 +113,7 @@
 
 
 .card {
-    width: 250px; /* Smaller fixed width for the card */
+    width: 400px !important; /* Smaller fixed width for the card */
     background-color: #f8f9fa;
     border: 1px solid #ced4da;
     border-radius: 5px;
@@ -136,6 +169,39 @@
     width: max-content;
 }
 
+.info-icon-th {
+    font-size: 16px; /* Adjust size as needed */
+    margin-left: 5px;
+    cursor: pointer;
+
+}
+
+.edit-distance-info-th {
+    display: inline-block;
+    margin-left: 5px;
+    position: relative;
+    cursor: pointer;
+}
+
+/* Optional: Add styles for the tooltip effect */
+.edit-distance-info-th[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+
+
+
+
 
 
 table {
@@ -152,15 +218,7 @@ table th, table td {
     text-align: center;
 }
 
-.pagination-button {
-    margin: 0 5px;
-    padding: 5px 10px;
-}
 
-.pagination-button:disabled {
-    background-color: #ddd;
-    cursor: not-allowed;
-}
 
 #projectForm {
     margin-top: 20px;
@@ -215,5 +273,36 @@ table th, table td {
     margin: 5px 0 0;
     font-size: 1.5em;
     color: #555;
+}
+
+
+.export-button-container {
+    text-align: right;
+    margin: 20px;
+}
+
+/* Styling the button */
+.export-button {
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    border: none; /* Remove border */
+    padding: 10px 20px; /* Padding */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    display: inline-flex; /* Align icon and text */
+    align-items: center; /* Center the icon and text vertically */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+/* Button hover effect */
+.export-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Styling the icon */
+.export-icon {
+    margin-right: 8px; /* Space between icon and text */
+    font-size: 20px; /* Icon size */
 }
 

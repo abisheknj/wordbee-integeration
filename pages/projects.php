@@ -142,8 +142,7 @@ function display_project_list() {
     $api_key = get_option('wordbee_api_key');
     $account_id = get_option('wordbee_username');
     $language_codes = [
-        "ab", "ach", "adh-UG", "aa", "af", "af-NA", "af-ZA", "ak", "ak-Fant", "ak-Fant-GH", 
-        "ak-GH", "sq", "sq-AL", "sq-MK", "sq-ALN", "sq-XK", "sq-ME", "sq-ALS", "gsw", 
+        "ab", "ach", "adh-UG", "aa", "af", "af-NA", "af-ZA", "ak", "ak-Fant", "ak-Fant-GH", "ak-GH", "sq", "sq-AL", "sq-MK", "sq-ALN", "sq-XK", "sq-ME", "sq-ALS", "gsw", 
         "gsw-FR", "am", "am-ET", "anu", "am-US", "apa", "ar", "ar-DZ", "ar-BH", "ar-TD", 
         "ar-EG", "ar-IQ", "ar-IL", "ar-JO", "ar-kab", "ar-KW", "ar-LB", "ar-LY", "ar-MR", 
         "ar-MA", "ar-OM", "ar-AA", "ar-PS", "ar-QA", "ar-SA", "ar-SY", "ar-TN", "ar-AE", 
@@ -200,10 +199,18 @@ function display_project_list() {
         "sl", "sl-SI", "xog", "so", "snk", "ckb", "es", "es-AR", "es-VE", "es-BO", "es-CL", 
         "es-CO", "es-CR", "es-CU", "es-DO", "es-EC", "es-SV", "es-GQ", "es-GT", "es-HN", 
         "es-001", "es-419", "es-MX", "es-NI"
+        
     ];
 
     
     $output = '';
+    $output .= '<div class = "loading">';
+    $output .= '<div class = "loading-container">';
+    $output .= '<h4>Generating Results</h4>';
+    $output .= '<div class="loading-wrapper">';
+    $output .=  '<div class="loader"></div>';
+    $output .=  '</div></div> </div>';
+
     
     // Check if API credentials are empty
     if (empty($api_key) || empty($account_id)) {
@@ -243,7 +250,8 @@ function display_project_list() {
         }
     }
 
-    
+   
+
 
 
 
@@ -288,13 +296,16 @@ function display_project_list() {
     
     $output .= '</form>';
 
-    $output .= '<div class="loading">
-    <div class="loading-spinner"></div>
-    </div>';
+  
 
     if ($project_list !== false) {
         if (!empty($project_list)) {
-            $output .= '<div id="projectListContainer">';
+
+           $output .= '<div class="export-button-container">';
+           $output .=  '<button class="export-button" onclick="exportTableToExcel()">Export</button>';
+           $output .= '</div>';
+
+            
             $output .= '<table class="project-table" id="projectTable" border="1" style="margin-top: 20px; width: 100%; border-collapse: collapse; font-size: 14px;">';
             $output .= '<tr>';
             $output .= '<th>Project ID & Name</th>';
@@ -303,26 +314,51 @@ function display_project_list() {
             $output .= '<th>Source Language</th>';
             $output .= '<th>Date Received</th>';
             $output .= '<th>Manager Name</th>';
+            $output .= '<th>Word Count</th>';
+            $output .= '<th>Char Count</th>';
             $output .= '</tr>';
     
             $total_average_edit_distance = 0;
             $project_count = 0;
+           
     
             foreach ($project_list as $project) {
                 $project_edit_distance = 0;
                 $job_count = 0;
                 $project_average_edit_distance = 0;
+                $total_word_counts = get_total_word_count($project['id']);
+                $total_words = 0;
+                $total_chars = 0;
+    
+    // Check if data exists
+                if (isset($total_word_counts['total_words']) && isset($total_word_counts['total_chars'])) {
+                   $total_words = $total_word_counts['total_words'];
+                   $total_chars = $total_word_counts['total_chars'];
+                
+                   // Log words and chars
+                   error_log("Total Words: $total_words, Total Chars: $total_chars");
+                }
+                 else {
+                   // Handle case where data doesn't exist or there was an error
+                   error_log("Error fetching total word counts: " . ($total_word_counts['error'] ?? 'Unknown error'));
+                }
+                
+
+
                 $output .= '<tr>';
                 $output .= '<td>' . esc_html($project['id']) . ' - ' . esc_html($project['reference']) . '</td>';
                 $output .= '<td>' . esc_html($project['client']) . '</td>';
                 $output .= '<td>' . esc_html($project['statust']) . '</td>';
                 $output .= '<td>' . esc_html($project['srct']) . '</td>';
-                $output .= '<td>' . esc_html(date('Y-m-d H:i:s', strtotime($project['dtreceived']))) . '</td>';
+                $output .= '<td>' . esc_html(date('Y-m-d', strtotime($project['dtreceived']))) . '</td>';
                 $output .= '<td>' . esc_html($project['managernm']) . '</td>';
+                $output .= '<td>' . esc_html($total_words) . '</td>';
+                $output .= '<td>' . esc_html($total_chars) . '</td>';
+
                 $output .= '</tr>';
     
                 $output .= '<tr>';
-                $output .= '<td colspan="6">';
+                $output .= '<td colspan="8">';
                 $output .= '<table class="job-table" border="1" style="width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px;">';
     
                 $jobs = get_jobs_list($project['id'], $trg);
@@ -331,11 +367,25 @@ function display_project_list() {
                     $output .= '<tr>';
                     $output .= '<th>Job ID</th>';
                     $output .= '<th>Status</th>';
-                    $output .= '<th>Source Language</th>';
-                    $output .= '<th>Target Language</th>';
-                    $output .= '<th>Task Type</th>';
+                    $output .= '<th>Source</th>';
+                    $output .= '<th>Target</th>';
                     $output .= '<th>Reference</th>';
-                    $output .= '<th>Edit distance</th>';
+                    $output .= '<th>Word Count</th>';
+                    $output .= '<th>Char Count</th>';
+                    $output .= '<th>Edits</th>';
+                    $output .= '<th>Edit distance';
+                    $output .= '<div class="edit-distance-info-th" title="editDistance = editDistanceSum / editDistanceSumLengths">';
+                    $output .= '<span class="info-icon-th">';
+                    $output .= '<svg width="16" height="16" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">';
+                    $output .= '<path d="M8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0ZM8.93 12.41H7.07V7.05H8.93V12.41ZM8.93 5.85H7.07V4.59H8.93V5.85Z"/>';
+                    $output .= '</svg>';
+                    $output .= '</span>';
+                    $output .= '</div>';
+                    $output .= '</th>';
+                    $output .= '<th>Edit distance Sum</th>';
+                    $output .= '<th>Edit distance Sum Lengths</th>';
+                    $output .= '<th>Edit distance Normalized</th>';
+                    
                     $output .= '</tr>';
     
                     foreach ($jobs['rows'] as $job) {
@@ -347,8 +397,16 @@ function display_project_list() {
                             'dateFrom' => $date_from,
                             'dateTo' => $date_to
                         );
-                        $data = get_text_edit($job['jobid'], $date_filter);
+                        $data = get_text_edit($job['jobid'], $date_filter , $job['trg']);
                         $edit_distance = 0;
+                        $edits = 0;
+                        $edit_distance_sum = 0;
+                        $edit_distance_sum_lengths = 0;
+                        $edit_distance_normalized = 0;
+                        if($data == false){
+                            $edit_distance = "Request Failed";
+                            $edits = "Request Failed";
+                        }
                         if ($data !== false) {
                             // Decode the JSON string into an array
                             $decoded_data = json_decode($data, true);
@@ -358,6 +416,10 @@ function display_project_list() {
                                 if (isset($decoded_data['counts']) && !empty($decoded_data['counts'])) {
                                     foreach ($decoded_data['counts'] as $item) {
                                         $edit_distance = $item['editDistance'];
+                                        $edits = $item['edits'];
+                                        $edit_distance_sum = $item['editDistanceSum'];
+                                        $edit_distance_sum_lengths = $item['editDistanceSumLengths'];
+                                        $edit_distance_normalized = $item['editDistanceSumNormalized'];
                                         $project_edit_distance += $edit_distance;
                                         error_log("edit distance added to " . $project_edit_distance);
                                         $job_count++;
@@ -365,15 +427,36 @@ function display_project_list() {
                                 }
                             }
                         }
-    
+                        $job_id = $job['jobid'];
+                        $job_status = $job['statust'];
+                        $job_source = $job['srct'];
+                        $job_target = $job['trgt'];
+                        $job_task = $job['taskt'];
+                        $job_reference = $job['reference'];
+                        $job_wordData = get_word_count_for_job($job_id);
+                        $word_count = 0;
+                        $char_count = 0;
+
+                        if (is_array($job_wordData)) {
+                            $word_count = $job_wordData['total_words'];
+                            $char_count = $job_wordData['total_chars'];
+                        }
+
+                        
                         $output .= '<tr>';
-                        $output .= '<td>' . esc_html($job['id']) . '</td>';
-                        $output .= '<td>' . esc_html($job['statust']) . '</td>';
-                        $output .= '<td>' . esc_html($job['srct']) . '</td>';
-                        $output .= '<td>' . esc_html($job['trgt']) . '</td>';
-                        $output .= '<td>' . esc_html($job['taskt']) . '</td>';
-                        $output .= '<td>' . esc_html($job['reference']) . '</td>';
+                        $output .= '<td>' . esc_html($job_id) . '</td>';
+                        $output .= '<td>' . esc_html($job_status ) . '</td>';
+                        $output .= '<td>' . esc_html($job_source) . '</td>';
+                        $output .= '<td>' . esc_html($job_target ) . '</td>';
+                        $output .= '<td>' . esc_html($job_reference) . '</td>';
+                        $output .= '<td>' . esc_html($word_count) . '</td>';
+                        $output .= '<td>' . esc_html($char_count) . '</td>';
+                        $output .= '<td>' . esc_html($edits) . '</td>';
                         $output .= '<td>' . esc_html($edit_distance) . '</td>';
+                        $output .= '<td>' . esc_html($edit_distance_sum) . '</td>';
+                        $output .= '<td>' . esc_html($edit_distance_sum_lengths) . '</td>';
+                        $output .= '<td>' . esc_html($edit_distance_normalized) . '</td>';
+
                         $output .= '</tr>';
                     }
     
@@ -382,7 +465,7 @@ function display_project_list() {
                     $total_average_edit_distance += $project_average_edit_distance;
                     $project_count++;
                 } else {
-                    $output .= '<tr><td colspan="7">No jobs found.</td></tr>';
+                    $output .= '<tr id="no-jobs" ><td colspan="7">No jobs found.</td></tr>';
                 }
     
                 $output .= '</table>';
@@ -391,7 +474,7 @@ function display_project_list() {
             }
     
             $output .= '</table>';
-            $output .= "</div>";
+            
             $final_edit_distance = ($project_count > 0) ? $total_average_edit_distance/$project_count : 0;
             $edit_distance_percentage = $final_edit_distance * 100;
 
@@ -403,9 +486,9 @@ function display_project_list() {
             $output .= '<div class="edit-distance-info" title="Edit distance * 100 is calculated as percentage">';
             $output .= '<span class="info-icon">ℹ️</span>';
             $output .= '</div>';
-            $output .= '<h3 class="card-title">Total Edit Distance</h3>';
+            $output .= '<h3 class="card-title">Average Edit Distance</h3>';
             $output .= '<p class="card-text">' . esc_html($final_edit_distance) . '</p>';
-            $output .= '<h3 class="card-title">Total Edit Distance Percentage</h3>';
+            $output .= '<h3 class="card-title">Edit Distance Percentage</h3>';
             $output .= '<p class="card-text">' . esc_html($edit_distance_percentage) . '%</p>';
             $output .= '</div>';
             $output .= '</div>';

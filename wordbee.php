@@ -31,6 +31,7 @@ require_once(WORDBEE_PLUGIN_DIR . 'includes/documents.php');
 function wordbee_enqueue_scripts() {
     wp_enqueue_style('wordbee-css', WORDBEE_PLUGIN_URL . 'assets/css/style.css');
     wp_enqueue_script('wordbee-js', WORDBEE_PLUGIN_URL . 'assets/js/script.js', array('jquery'), null, true);
+    wp_enqueue_script('sheet.js', WORDBEE_PLUGIN_URL . 'assets/js/sheet.js');
 }
 add_action('wp_enqueue_scripts', 'wordbee_enqueue_scripts');
 
