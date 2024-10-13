@@ -3,7 +3,10 @@ $(document).ready(function () {
 
 
     $('#projectForm').submit(function (event) {
-        $('.loading').show(); // Show loading spinner
+        $('.loading').show();
+        $('table').hide();
+        $('.card').hide();
+         // Show loading spinner
 
         // Prevent default form submission to handle with AJAX
         event.preventDefault();
@@ -62,30 +65,18 @@ $(document).ready(function () {
 
 
 
-function exportTableToExcel() {
-    const fileName = 'report-sheet.xlsx';
+function exportTableToExcel(client_name, src, trg, dateFrom, dateTo) {
+    const fileName = `report_${client_name}_${src}_${trg}_${dateFrom}_${dateTo}.xlsx`;
     const table = document.getElementById('projectTable');
 
     // Clone the table and remove elements with id 'no-jobs'
     const clone = table.cloneNode(true);
-    const excludeElements = clone.querySelectorAll('#no-jobs');
-    excludeElements.forEach(el => el.remove());
-
-    // Log the cloned table to console for inspection
-    console.log('Cloned Table:', clone);
-
-    console.log(clone.innerHTML);
-
-    // Remove any unwanted styles or attributes from table rows
-    clone.querySelectorAll('tr').forEach(row => {
-        row.removeAttribute('style'); // Remove any inline styles
-    });
-
-    // Convert the modified table to a workbook and export
+    console.log('export')
     const wb = XLSX.utils.table_to_book(clone);
-    console.log(wb);
+
     XLSX.writeFile(wb, fileName);
 }
+
 
 
 

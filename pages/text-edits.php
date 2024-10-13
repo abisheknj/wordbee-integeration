@@ -105,7 +105,7 @@ function display_text_edits() {
                         $output .= '</div>';
 
 
-                        // Generate the HTML table with Bootstrap classes
+
                         $output .= '<div class="table-responsive">';
                         $output .= '<table class="table table-striped">';
                         $output .= '<thead>';
